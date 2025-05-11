@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Threat Classifier</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Threat Classifier</h1>
+
+    <!-- Input -->
+    <textarea id="threatInput" placeholder="Enter threat description..."></textarea>
+    <br>
+    <label><input type="checkbox" id="flagThreat"> Mark this threat as flagged</label>
+    <br>
+    <label for="modeSelect">Mode:</label>
+    <select id="modeSelect">
+      <option value="strict">Detect</option>
+      <option value="chat">Open Chat</option>
+    </select>
+    <br><br>
+    <button id="submitBtn">Classify</button>
+    <button id="generateReportBtn">Generate Full Report</button>
+
+    <!-- Bulk Tools -->
+    <br><br>
+    <button id="downloadBtn">Download Log</button>
+    <input type="file" id="csvUpload" accept=".csv" />
+    <button id="uploadBtn">Classify CSV</button>
+
+    <!-- Output -->
+    <div id="result" style="margin-top: 20px;"></div>
+
+    <!-- Full Report Output -->
+    <div id="fullReport" style="margin-top: 20px; border: 1px solid #444; padding: 15px; border-radius: 6px; background: #1e1e1e;"></div>
+
+    <!-- Toggle raw JSON -->
+    <label><input type="checkbox" id="toggleRawJson"> 🧪 Show Raw JSON</label>
+    <pre id="rawJsonBox" style="display:none; background:#1e1e1e; color:#ccc; padding:10px; border-radius:5px;"></pre>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

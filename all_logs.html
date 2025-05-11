@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Logs</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+    tr.reviewed {
+      background-color: #1a3320;
+    }
+    tr.unreviewed {
+      background-color: #332020;
+    }
+    th {
+      background-color: #1e1e1e;
+      color: #e50914;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h1>📋 All Classified Threat Logs</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Type</th>
+          <th>Severity</th>
+          <th>Risk</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="{% if log.timestamp in comments and comments[log.timestamp]['resolution'] %}reviewed{% elif log.timestamp in comments %}unreviewed{% endif %}">
+          <td>{{ log.timestamp }}</td>
+          <td>{{ log.type }}</td>
+          <td><span class="badge {{ log.severity|lower }}">{{ log.severity }}</span></td>
+          <td>{{ log.risk }}</td>
+          <td>
+            <button onclick="setReview('{{ log.timestamp }}', true)">✔️ Mark Reviewed</button>
+            <button onclick="setReview('{{ log.timestamp }}', false)">❌ Unreview</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function setReview(timestamp, resolution) {
+      fetch("/api/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timestamp, resolution })
+      }).then(res => location.reload());
+    }
+  </script>
+</body>
+</html>

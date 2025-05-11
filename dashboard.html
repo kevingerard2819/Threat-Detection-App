@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Threat Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .chart-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .chart-container canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+    .btn-center {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h1>Admin Dashboard</h1>
+    <p id="reviewStatus" style="font-size: 14px; margin-top: -10px;">Loading status...</p>
+
+    <div class="nav-buttons">
+      <a href="/classify"><button>Go to Classifier</button></a>
+      <a href="/logout"><button>Logout</button></a>
+    </div>
+
+    <section>
+      <h2>🧾 Recent Classifications</h2>
+      <ul id="logList"></ul>
+    </section>
+
+    <section>
+      <h2>📊 Threat Statistics</h2>
+      <div class="chart-container">
+        <canvas id="statsChart"></canvas>
+      </div>
+
+      <div class="btn-center">
+        <a href="/view-all">
+          <button style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">
+            View All Logs
+          </button>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>🧠 Threat Summary</h2>
+      <div id="summaryBox">Loading summary...</div>
+    </section>
+  </div>
+
+  <script>
+  fetch("/api/log")
+    .then(response => response.json())
+    .then(data => {
+      const logs = data.logs;
+      const riskSums = { High: 0, Medium: 0, Low: 0 };
+      const counts = { High: 0, Medium: 0, Low: 0 };
+
+      logs.forEach(log => {
+      let raw = log.severity || "";
+      const severity = raw.trim().charAt(0).toUpperCase() + raw.trim().slice(1).toLowerCase();
+      const risk = parseInt(log.risk || 0);
+
+      if (severity in riskSums) {
+          riskSums[severity] += risk;
+          counts[severity] += 1;
+        }   
+      });
+
+
+      const avgRisk = {
+        High: counts.High ? riskSums.High / counts.High : 0,
+        Medium: counts.Medium ? riskSums.Medium / counts.Medium : 0,
+        Low: counts.Low ? riskSums.Low / counts.Low : 0
+      };
+
+      const ctx = document.getElementById("statsChart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["High", "Medium", "Low"],
+          datasets: [{
+            label: "Average Risk Score",
+            data: [avgRisk.High, avgRisk.Medium, avgRisk.Low],
+            backgroundColor: ["#dc3545", "#ffc107", "#28a745"]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: { display: true, text: "Risk Score (0–100)" }
+            }
+          }
+        }
+      });
+    })
+    .catch(error => console.error("Chart error:", error));
+  </script>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
